@@ -8,6 +8,26 @@ export function detectAnomalies(symbol, history, insiderFilings = []) {
     const prev20 = history.slice(-21, -1);
 
     // Rule 1: Volume Spike
+    /*
+    *   Volume is defined as the number of shares traded during a given period.
+    *   Volume spikes refer to the analysis of a stock's trading volume. If trades involving this specific
+    * stock's spike up past 2-3 times the average volume involving this stock, then there is reason
+    * to believe that this stock is likely subject to a Volume Spike.
+    *   As volume fluctuates, it indicates that the market is spurring and that more money and action is
+    * being spent within the stock market. Thus, indicating that some major events for a specific stock are
+    * anticipated to take place.
+    *   Any spikes equal to or above 2x the average deserves to be studied. When the spike reaches 3-5x,
+    * bigger changes are underway within the market and deserve more attention. Lastly, 5x+ spikes
+    * indicate information regarding aquisitions, earnings , or announcements are being released.
+    *   This event does not necessarily indicate that something illegal is taking place, however, they are often
+    * a baseline indicator that something deserves attention in case something suspcicious is taking place 
+    * under the surface.
+    *   In this site, volume spikes are being studied to determine if insiders are leveraging undisclosed
+    * information in hopes to gain an advantage over less informed traders.
+    *
+    * --> Investing.com(https://www.investing.com/academy/trading/volume-spike-stock-move-definition/)
+    * --> Investopedia.com(https://www.investopedia.com/terms/v/volume.asp)
+    */
     const avgVolume = prev20.reduce((sum, d) => sum + d.volume, 0) / 20;
     const volumeRatio = today.volume / avgVolume;
     if (volumeRatio >= 2) {
@@ -15,13 +35,16 @@ export function detectAnomalies(symbol, history, insiderFilings = []) {
             type: "VOLUME_SPIKE",
             symbol,
             severity: volumeRatio >= 4 ? "HIGH" : "MEDIUM",
-            detail: `Volume is ${volumeRatio.toFixed(1)}× the 20-day average (${today.volume.toLocaleString()} vs avg ${Math.round(avgVolume).toLocaleString()})`,
+            detail: 'Volume is ${volumeRatio.toFixed(1)}× the 20-day average (${today.volume.toLocaleString()} vs avg ${Math.round(avgVolume).toLocaleString()})',
             timestamp: today.date,
             rule: "Unusual volume can indicate informed trading ahead of undisclosed material events."
         });
     }
 
     // Rule 2: Single-Day Price Surge
+    /**
+     * When companies are planning to release their earnings 
+     */
     const yesterday = history[history.length - 2];
     const priceChange = (today.close - yesterday.close) / yesterday.close;
     if (priceChange >= 0.05 && volumeRatio >= 1.5) {
