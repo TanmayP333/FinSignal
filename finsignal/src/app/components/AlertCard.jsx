@@ -5,10 +5,10 @@ const SEVERITY_COLORS = {
 };
 
 const TYPE_LABELS = {
-  VOLUME_SPIKE: "🔊 Volume Spike",
-  PRICE_SURGE: "📈 Abnormal Price Move",
-  PUMP_SIGNAL: "🚨 Pump Signal",
-  INSIDER_CLUSTER: "👤 Insider Cluster",
+  VOLUME_SPIKE: "Volume Spike",
+  PRICE_SURGE: "Abnormal Price Move",
+  PUMP_SIGNAL: "Pump Signal",
+  INSIDER_CLUSTER: "Insider Cluster",
 };
 
 export default function AlertCard({ alert, onClick }) {
