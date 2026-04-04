@@ -67,3 +67,53 @@ export default function MethodologyPage() {
     </main>
   );
 }
+const rules = [
+  {
+    id: 1,
+    name: "Volume Spike",
+    severity: "HIGH",
+    explanation: "", // you write this
+    formula: "Volume Ratio = Today's Volume / 20-Day Avg Volume | Flag if >= 2.0x",
+    whyItMatters: "", // you write this
+  },
+  {
+    id: 2,
+    name: "Pre-Announcement Price Surge",
+    severity: "HIGH",
+    explanation: "",
+    formula: "Price Change = (Close - Prev Close) / Prev Close | Flag if >= 5% with Volume Ratio >= 1.5x",
+    whyItMatters: "",
+  },
+  {
+    id: 3,
+    name: "Pump-and-Dump Signal",
+    severity: "HIGH",
+    explanation: "",
+    formula: "5-Day Gain = (Today's Close - Close 5 Days Ago) / Close 5 Days Ago | Flag if price < $5 AND gain >= 30%",
+    whyItMatters: "",
+  },
+  {
+    id: 4,
+    name: "Insider Filing Cluster",
+    severity: "MEDIUM",
+    explanation: "",
+    formula: "Source: SEC EDGAR Form 4 filings | Flag if 3+ filings within 30-day window",
+    whyItMatters: "",
+  },
+  {
+    id: 5,
+    name: "Sentiment-Price Divergence",
+    severity: "MEDIUM",
+    explanation: "",
+    formula: "Flag if price >= +4% AND news count = 0 OR avg sentiment score < -0.10",
+    whyItMatters: "",
+  },
+  {
+    id: 6,
+    name: "", // your custom rule name
+    severity: "",
+    explanation: "",
+    formula: "",
+    whyItMatters: "",
+  },
+];
