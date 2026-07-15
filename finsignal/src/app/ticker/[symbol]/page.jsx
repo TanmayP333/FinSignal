@@ -1,99 +1,59 @@
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
-import { RechartsDevtools } from '@recharts/devtools';
-import {getDailyHistory} from "../lib/alphaVantage";
-import {getInsiderFilings} from "../lib/edgar";
-import {detectAnomalies} from "../lib/anomalyDetector";
+"use client";
+import { useEffect, useState } from "react";
+import { getDailyHistory } from "@/lib/alphaVantage";
+import { getInsiderFilings } from "@/lib/edgar";
+import PriceChart from "@/components/PriceChart";
 
-const WATCHLIST = ["AMZN", "AAPL", "GS", "BA", "PLTR",
-                "LMT", "WMT", "UNH", "XOM", "BRK.B",
-                "AMCR", "ALMS", "TECX", "NVDA", "META"];
+export default function TickerDetail({ params }) {
+  const { symbol } = params;
+  const [data, setData] = useState(null);
+  const [filings, setFilings] = useState([]);
 
+  useEffect(() => {
+    async function fetchData() {
+      const history = await getDailyHistory(symbol);
+      const insiderData = await getInsiderFilings(symbol);
+      setData(history);
+      setFilings(insiderData);
+    }
+    fetchData();
+  }, [symbol]);
 
-export default function IndexLineChart() {
-    useEffect(() => {
-            async function runScans(){
-                const allAlerts = [];
-    
-                for(const symbol of WATCHLIST){
-                    try{
-                        const data = await getDailyHistory(symbol);
-                    }
-                    catch (err){
-                        console.error('Failed to scan ${symbol}: ', err);
-                    }
-                }
-    
-                setAlerts(allAlerts);
-                setLoading(false);
-            }
-            runScans();
-        }, []);
+  if (!data) return <div className="text-center py-20 text-gray-500">Loading Market Data...</div>;
 
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-4xl font-black">{symbol} Analysis</h1>
+        <p className="text-gray-400">100-Day Performance & Forensic Indicators</p>
+      </div>
 
-        /*show users graph with price+volume - alphaVantage.js, table of insider filings - edgar.js, anomaly detector.js*/
-    return (
-        <LineChart style={{ width: '100%', aspectRatio: 1.618, maxWidth: 800, margin: 'auto' }} responsive data={data}>
-        <CartesianGrid stroke="var(--color-border-3)" strokeDasharray="5 5" />
+      <PriceChart data={data} />
 
-        <XAxis 
-            dataKey="date" 
-            stroke="#4a6070"
-            tick={{ fill: "#4a6070", fontSize: 10 }}
-            tickLine={false}
-            interval="preserveStartEnd"
-        />
-        <YAxis 
-            yAxisId="price"
-            orientation="left"
-            stroke="#4a6070"
-            tick={{ fill: "#4a6070", fontSize: 10 }}
-            tickLine={false}
-            width={60}
-            tickFormatter={(v) => '$${v.toFixed(0)}'}
-        />
-        <YAxis 
-            yAxisId="volume"
-            orientation="right"
-            stroke="#4a6070"
-            tick={{ fill: "#4a6070", fontSize: 10 }}
-            tickLine={false}
-            width={70}
-            tickFormatter={(v) => '${(v / 1_000_000).toFixed(1)}M'}
-        />
-        <Line
-            type="monotone"
-            dataKey="uv"
-            stroke="var(--color-chart-1)"
-            dot={{
-                fill: 'var(--color-surface-base)',
-            }}
-            activeDot={{
-                stroke: 'var(--color-surface-base)',
-            }}
-        />
-        <Line
-            type="monotone"
-            dataKey="pv"
-            stroke="var(--color-chart-2)"
-            dot={{
-                fill: 'var(--color-surface-base)',
-            }}
-            activeDot={{
-                stroke: 'var(--color-surface-base)',
-            }}
-        />
-        <Line
-            type="monotone"
-            dataKey="pv"
-            stroke="var(--color-chart-2)"
-            dot={{
-                fill: 'var(--color-surface-base)',
-            }}
-            activeDot={{
-                stroke: 'var(--color-surface-base)',
-            }}
-        />
-        <RechartsDevtools />
-        </LineChart>
-    );
+      <section>
+        <h2 className="text-xl font-bold mb-4">Recent SEC Form 4 Filings (Insiders)</h2>
+        <div className="overflow-x-auto border border-gray-800 rounded-lg">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-900 text-gray-400 uppercase text-[10px] tracking-widest">
+              <tr>
+                <th className="p-4">Date</th>
+                <th className="p-4">Filer</th>
+                <th className="p-4">Description</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-800">
+              {filings.map((f, i) => (
+                <tr key={i} className="hover:bg-gray-950">
+                  <td className="p-4">{f._source.file_date}</td>
+                  <td className="p-4 font-medium">{f._source.display_names[0]}</td>
+                  <td className="p-4 text-gray-400">{f._source.root_form} - Insider Transaction</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filings.length === 0 && <p className="p-8 text-center text-gray-600">No recent insider filings found.</p>}
+        </div>
+      </section>
+    </div>
+  );
 }
